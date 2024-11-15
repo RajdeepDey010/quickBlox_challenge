@@ -4,6 +4,8 @@ A desktop chat application with cool user interface. Create your account in Quic
 ## Setup
  git clone https://github.com/RajdeepDey010/quickBlox_challenge.git
 
+ cd app
+ 
  npm install
 
  npm run watch
