@@ -21,21 +21,27 @@ A desktop chat application with cool user interface. Create your account in Quic
 
  QuickBlox React UI Kit
 
- ## App Credentials
- `Setup your app credentials in main.js:
- credentials: 
-    {
-        appId: ,
-        accountKey: ,
-        authKey: ,
-        authSecret: ,
-    }
- 
- Also in the function prepareDataForRenderer():
- appId: ,
- accountKey: '',
- authKey: '',
- authSecret: '',`
+## App Credentials
+
+Set up your app credentials in `main.js`:
+
+```javascript
+credentials: 
+{
+    appId: '',      // Your App ID
+    accountKey: '', // Your Account Key
+    authKey: '',    // Your Auth Key
+    authSecret: '', // Your Auth Secret
+}
+
+prepareDataForRenderer() {
+    return {
+        appId: '',      // Your App ID
+        accountKey: '', // Your Account Key
+        authKey: '',    // Your Auth Key
+        authSecret: '', // Your Auth Secret
+    };
+}
 
 ## Demo
  Project Demo: 
