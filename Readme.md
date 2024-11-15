@@ -3,17 +3,25 @@ A desktop chat application with cool user interface. Create your account in Quic
 
 ## Setup
  git clone https://github.com/RajdeepDey010/quickBlox_challenge.git
+
  npm install
+
  npm run watch
+
  npm start
 
 ## Tech Stack
  HTML/CSS
+
  Electronjs
+
  Reactjs
+
  QuickBlox React UI Kit
 
 ## Demo
- Project Demo: https://drive.google.com/file/d/1-xVvtTY8EUxCo3LbbJ9STOJWSFDDRJO9/view?usp=sharing
+ Project Demo: 
+ 
+ https://drive.google.com/file/d/1-xVvtTY8EUxCo3LbbJ9STOJWSFDDRJO9/view?usp=sharing
 
 Happy Coding!
