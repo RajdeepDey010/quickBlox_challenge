@@ -1,17 +1,24 @@
-export const QBConfig = {
+// main processing use node js
+const {app, BrowserWindow, ipcMain } = require('electron');
+const path = require("path");
+
+const userRequiredParams = {
+    'login': 'wwe',
+    'password': 'aaaaaaaa'
+};
+const QBConfig = {
     credentials: {
         appId: 104551,
-        accountKey: "ack_-zvu_ms72ZEMCWKzAs3U",
-        authKey: "ak_CR8NNxZTPnf7m7H",
-        authSecret: "as_QFjAcnR9RDEjVLE",
+        accountKey: 'ack_-zvu_ms72ZEMCWKzAs3U',
+        authKey: 'ak_CR8NNxZTPnf7m7H',
+        authSecret: 'as_QFjAcnR9RDEjVLE',
         sessionToken: '',
     },
     configAIApi: {
         AIAnswerAssistWidgetConfig: {
-            smartChatAssistantId: '',
             organizationName: 'Quickblox',
             openAIModel: 'gpt-3.5-turbo',
-            apiKey: '',
+            apiKey: 'YOUR_OpenAi_API_KEY',
             maxTokens: 3584,
             useDefault: true,
             proxyConfig: {
@@ -21,32 +28,28 @@ export const QBConfig = {
             },
         },
         AITranslateWidgetConfig: {
-            smartChatAssistantId: '',
             organizationName: 'Quickblox',
             openAIModel: 'gpt-3.5-turbo',
-            apiKey: '',
+            apiKey: 'sYOUR_OpenAi_API_KEY',
             maxTokens: 3584,
             useDefault: true,
-            defaultLanguage: '',
-            languages: [
-                'English',
-                'Spanish',
-                'French',
-                'Portuguese',
-                'German',
-                'Ukrainian',
-            ],
+            defaultLanguage: 'Ukrainian',
+            languages: ['Ukrainian', 'English', 'French', 'Portuguese', 'German'],
             proxyConfig: {
                 api: 'v1/chat/completions',
-                servername: 'https://api.openai.com/',
+                servername: '',
                 port: '',
             },
+            // proxyConfig: {
+            //   api: 'v1/chat/completions',
+            //   servername: 'http://localhost',
+            //   port: '3012',
+            // },
         },
         AIRephraseWidgetConfig: {
-            smartChatAssistantId: '',
             organizationName: 'Quickblox',
             openAIModel: 'gpt-3.5-turbo',
-            apiKey: '',
+            apiKey: 'YOUR_OpenAi_API_KEY',
             maxTokens: 3584,
             useDefault: true,
             defaultTone: 'Professional',
@@ -120,7 +123,7 @@ export const QBConfig = {
         },
     },
     appConfig: {
-        maxFileSize: 10485760,
+        maxFileSize: 10 * 1024 * 1024,
         sessionTimeOut: 122,
         chatProtocol: {
             active: 2,
@@ -128,22 +131,98 @@ export const QBConfig = {
         debug: true,
         enableForwarding: true,
         enableReplying: true,
-        regexUserName: '',
+        regexUserName: '^(?=[a-zA-Z])[-a-zA-Z_ ]{3,49}(?<! )$',
         endpoints: {
-            api: 'https://api.quickblox.com',
+            api: 'api.quickblox.com',
             chat: 'chat.quickblox.com',
         },
-        // on: {
-        //   // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/require-await
-        //   async sessionExpired(handleResponse: any, retry: any) {
-        //     console.log(
-        //       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        //       `QBconfig sessionExpired handle: ${handleResponse} ${retry}`,
-        //     );
-        //   },
-        // },
         streamManagement: {
             enable: true,
         },
     },
 };
+
+function createWindow(){
+    // renderer processing
+    const win = new BrowserWindow({
+        width:800,
+        height:600,
+        backgroundColor: "white",
+        // webPreferences: {
+        //     nodeIntegration: true
+        // }
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            worldSafeExecuteJavaScript: true,
+            preload: path.join(__dirname, 'preload.js'),
+        }
+    });
+    win.loadFile('index.html');
+}
+
+const createUserSession = () => {
+    let QuickBlox = require('quickblox').QuickBlox;
+    const QBOther = new QuickBlox();
+
+    const APPLICATION_ID = QBConfig.credentials.appId;
+    const AUTH_KEY = QBConfig.credentials.authKey;
+    const AUTH_SECRET = QBConfig.credentials.authSecret;
+    const ACCOUNT_KEY = QBConfig.credentials.accountKey;
+    const CONFIG = QBConfig.appConfig;
+
+    QBOther.init(APPLICATION_ID, AUTH_KEY, AUTH_SECRET, ACCOUNT_KEY, CONFIG);
+
+    return new Promise((resolve, reject) => {
+        console.log('Create User Session QB.createSession, params ', JSON.stringify(userRequiredParams));
+        QBOther.createSession(userRequiredParams, (error, result) => {
+            if (error) {
+                console.log('createUserSession error in QB.createSession', JSON.stringify(error));
+                reject(error);
+            } else {
+                console.log('createUserSession ok in QB.createSession', JSON.stringify(result));
+                resolve(result);
+            }
+        });
+    });
+};
+
+async function prepareDataForRenderer() {
+    try {
+        const session = await createUserSession();
+        const data = {config:{ ...QBConfig, credentials: {appId: 104551,
+                                                            accountKey: 'ack_-zvu_ms72ZEMCWKzAs3U',
+                                                            authKey: 'ak_CR8NNxZTPnf7m7H',
+                                                            authSecret: 'as_QFjAcnR9RDEjVLE',
+                                                            sessionToken: session.token,},},
+                         currentUserName: userRequiredParams.login,
+                         sessionToken: session.token};
+        return data;
+    } catch (error) {
+        throw new Error('Error Found: ' + error.message);
+    }
+}
+
+ipcMain.on('request-data', async (event, arg) => {
+    try {
+        const data = await prepareDataForRenderer();
+        event.reply('response-data', data);
+    } catch (error) {
+        event.reply('response-error', error.message);
+    }
+});
+app.whenReady().then( () => {
+    createWindow();
+});
+
+
+app.on('window-all-closed', ()=>{
+    if (process.platform !== 'darwin'){
+        app.quit();
+    }
+})
+app.on('activate', ()=>{
+    if (BrowserWindow.getAllWindows().length === 0){
+        createWindow();
+    }
+})
