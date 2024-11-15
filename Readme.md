@@ -5,7 +5,7 @@ A desktop chat application with cool user interface. Create your account in Quic
  git clone https://github.com/RajdeepDey010/quickBlox_challenge.git
 
  cd app
- 
+
  npm install
 
  npm run watch
@@ -20,6 +20,22 @@ A desktop chat application with cool user interface. Create your account in Quic
  Reactjs
 
  QuickBlox React UI Kit
+
+ ## App Credentials
+ `Setup your app credentials in main.js:
+ credentials: 
+    {
+        appId: ,
+        accountKey: ,
+        authKey: ,
+        authSecret: ,
+    }
+ 
+ Also in the function prepareDataForRenderer():
+ appId: ,
+ accountKey: '',
+ authKey: '',
+ authSecret: '',`
 
 ## Demo
  Project Demo: 
