@@ -42,6 +42,7 @@ prepareDataForRenderer() {
         authSecret: '', // Your Auth Secret
     };
 }
+```
 
 ## Demo
  Project Demo: 
